@@ -20,9 +20,17 @@ interface UseVoiceOptions {
 export function useVoice(options: UseVoiceOptions) {
   const [state, setState] = useState<TransportState>("disconnected");
   const [botSpeaking, setBotSpeaking] = useState(false);
+  const [thinking, setThinking] = useState(false);
   const [userText, setUserText] = useState("");
   const [botText, setBotText] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Live amplitudes (0..1) for the orb animation. Kept in refs, NOT state: the audio-level
+  // callbacks fire ~20x/sec and driving React state that fast would thrash re-renders. The
+  // page reads these in a requestAnimationFrame loop instead. Read-only — they never touch
+  // mic capture, so they can't affect the call.
+  const micLevelRef = useRef(0);
+  const botLevelRef = useRef(0);
 
   const clientRef = useRef<PipecatClient | null>(null);
   // Latest options in a ref so the once-created client callbacks always see fresh values.
@@ -41,12 +49,22 @@ export function useVoice(options: UseVoiceOptions) {
         enableCam: false,
         callbacks: {
           onTransportStateChanged: (s) => setState(s),
-          onBotStartedSpeaking: () => setBotSpeaking(true),
+          onBotStartedSpeaking: () => {
+            setBotSpeaking(true);
+            setThinking(false); // the reply is now audible — leave the thinking state
+          },
           onBotStoppedSpeaking: () => setBotSpeaking(false),
+          onLocalAudioLevel: (level) => {
+            micLevelRef.current = level;
+          },
+          onRemoteAudioLevel: (level) => {
+            botLevelRef.current = level;
+          },
           onUserTranscript: (data) => {
             if (data.final) {
               setUserText(data.text);
               setBotText("");
+              setThinking(false); // user is speaking again — back to listening
               optsRef.current.onUserTurn?.(data.text);
             }
           },
@@ -59,7 +77,9 @@ export function useVoice(options: UseVoiceOptions) {
               data?: { type?: string; text?: string };
             };
             const payload = raw?.data ?? raw;
-            if (payload?.type === "bot_reply" && payload.text) {
+            if (payload?.type === "thinking") {
+              setThinking(true); // agent started running, before the spoken reply
+            } else if (payload?.type === "bot_reply" && payload.text) {
               setBotText(payload.text);
               optsRef.current.onBotTurn?.(payload.text);
             }
@@ -80,6 +100,9 @@ export function useVoice(options: UseVoiceOptions) {
     setError(null);
     setUserText("");
     setBotText("");
+    setThinking(false);
+    micLevelRef.current = 0;
+    botLevelRef.current = 0;
     // Guard: if called straight from onClick the arg is a MouseEvent, not an id.
     const cid = typeof conversationId === "number" ? conversationId : null;
     try {
@@ -95,5 +118,16 @@ export function useVoice(options: UseVoiceOptions) {
     void clientRef.current?.disconnect();
   }
 
-  return { state, botSpeaking, userText, botText, error, connect, disconnect };
+  return {
+    state,
+    botSpeaking,
+    thinking,
+    userText,
+    botText,
+    error,
+    connect,
+    disconnect,
+    micLevelRef,
+    botLevelRef,
+  };
 }

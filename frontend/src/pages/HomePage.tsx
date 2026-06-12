@@ -4,7 +4,8 @@ import {
   BoltIcon,
   BotIcon,
   ChatBubbleIcon,
-  CircleCheckIcon,
+  CheckCircleIcon,
+  CheckIcon,
   ShieldCheckIcon,
 } from "@/components/icons";
 import { useSession } from "@/lib/session";
@@ -41,86 +42,186 @@ export function HomePage() {
       </nav>
 
       <div className="hero">
-        <span className="pill">
-          <i />
-          AI support online · avg resolution 54s
-        </span>
-        <h1>
-          Electronics, delivered.
-          <br />
-          Problems, resolved in a minute.
-        </h1>
-        <p className="sub">
-          Track your orders and request refunds through an AI assistant that checks every decision
-          against our return policy — instantly, transparently.
-        </p>
-        <div className="ctas">
-          <Link to="/chat" className="btn primary">
-            <ChatBubbleIcon />
-            Get support
-          </Link>
-          <a href="#how" className="btn">
-            How it works
-          </a>
-        </div>
-      </div>
-
-      <div className="how" id="how">
-        <p className="how-label">HOW REFUNDS WORK</p>
-        <div className="steps">
-          <div className="stepc">
-            <span className="num">01</span>
-            <div className="ic">
-              <ChatBubbleIcon />
-            </div>
-            <b>Tell the assistant</b>
-            <p>Chat or speak. It finds your order from your email — no forms, no hold music.</p>
-          </div>
-          <div className="stepc">
-            <span className="num">02</span>
-            <div className="ic">
-              <ShieldCheckIcon />
-            </div>
-            <b>Policy check</b>
-            <p>
-              Every request runs through our return policy — the 30-day window, item condition, and
-              order history.
-            </p>
-          </div>
-          <div className="stepc">
-            <span className="num">03</span>
-            <div className="ic">
-              <CircleCheckIcon />
-            </div>
-            <b>Instant decision</b>
-            <p>
-              Eligible refunds are issued on the spot. Anything over ₹50,000 goes to a manager
-              within 24 hours.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="strip">
-        <div className="strip-inner">
-          <div className="bot">
-            <BotIcon />
-          </div>
+        <div className="hero-inner">
           <div>
-            <b>Need help right now?</b>
-            <small>The refund assistant is online — most cases close in under a minute</small>
+            <span className="pill">
+              <i />
+              AI support online · avg resolution 54s
+            </span>
+            <h1>
+              Refunds decided in seconds — <em>with reasoning you can see.</em>
+            </h1>
+            <p className="sub">
+              Our AI assistant finds your order, checks your request against the return policy, and
+              decides on the spot — and explains the policy reason behind every decision.
+            </p>
+            <div className="ctas">
+              <Link to="/chat" className="btn w">
+                <ChatBubbleIcon />
+                Get support
+              </Link>
+              <Link to="/orders" className="btn g">
+                Your orders
+              </Link>
+            </div>
+            <div className="ticks">
+              <span>
+                <CheckIcon />
+                30-day returns
+              </span>
+              <span>
+                <CheckIcon />
+                Defects always covered
+              </span>
+              <span>
+                <CheckIcon />
+                No hold music
+              </span>
+            </div>
           </div>
-          <span className="sp" />
-          <Link to="/chat" className="btn primary">
-            Start a chat
-          </Link>
+
+          <div className="stack">
+            <div className="trace">
+              <p className="tt">
+                <i />
+                AGENT REASONING — LIVE
+              </p>
+              <div className="trow">
+                <b>lookup_customer</b>
+                <span className="ok">✓</span>
+                <span>cust-7 · 3 orders</span>
+                <span className="ms">38ms</span>
+              </div>
+              <div className="trow">
+                <b>get_order</b>
+                <span className="ok">✓</span>
+                <span>ORD-38 · ₹24,990</span>
+                <span className="ms">41ms</span>
+              </div>
+              <div className="trow">
+                <b>check_eligibility</b>
+                <span className="ok">✓</span>
+                <span>defective → covered</span>
+                <span className="ms">12ms</span>
+              </div>
+              <div className="trow">
+                <b>issue_refund</b>
+                <span className="ok">✓</span>
+                <span>re-validated · issued</span>
+                <span className="ms">29ms</span>
+              </div>
+            </div>
+
+            <div className="hero-chat">
+              <div className="chead">
+                <div className="bot">
+                  <BotIcon />
+                </div>
+                <div>
+                  <b>Refund assistant</b>
+                  <span>
+                    <span className="dot" />
+                    Online · replies instantly
+                  </span>
+                </div>
+              </div>
+              <div className="cmsgs">
+                <div className="cu">My earbuds arrived dead. I want a refund.</div>
+                <div className="ca">
+                  Sorry about that! Found your order — Sony WF-1000XM5, ₹24,990, delivered 3 days
+                  ago.
+                </div>
+                <div className="ca">
+                  You're covered — defective items are always refundable.
+                  <div className="cticket">
+                    <CheckCircleIcon />
+                    ₹24,990 refund issued · 3–5 business days
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="xray">
+              <div className="xk">
+                <ShieldCheckIcon />
+              </div>
+              <div>
+                <b>Every decision audited</b>
+                <small>4 checks · 4.2 seconds</small>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <p className="foot">
-        30-day returns on sealed items · Defective items always covered · Refunds checked by our
-        policy engine
-      </p>
+      <div className="stats">
+        <div className="stats-inner">
+          <div className="stat">
+            <b>54s</b>
+            <span>average resolution</span>
+          </div>
+          <div className="stat">
+            <b>92%</b>
+            <span>resolved without a human</span>
+          </div>
+          <div className="stat">
+            <b>100%</b>
+            <span>policy-checked decisions</span>
+          </div>
+          <div className="stat">
+            <b>24h</b>
+            <span>manager review for ₹50,000+</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="verd">
+        <p className="vlabel">THREE HONEST OUTCOMES</p>
+        <p className="vh">
+          An assistant that can also say <em>no</em> — and knows when to ask.
+        </p>
+        <div className="vgrid">
+          <div className="vcard">
+            <span className="vpill vp-ok">APPROVE</span>
+            <b>Eligible? Refunded instantly</b>
+            <p>
+              Within the window, sealed or defective — your money is on its way before the chat
+              ends.
+            </p>
+          </div>
+          <div className="vcard">
+            <span className="vpill vp-no">DENY</span>
+            <b>Out of policy? We say so</b>
+            <p>
+              Past 30 days or final-sale items get a clear, honest no — with the exact policy reason.
+            </p>
+          </div>
+          <div className="vcard">
+            <span className="vpill vp-esc">ESCALATE</span>
+            <b>Big amounts? A human decides</b>
+            <p>
+              Refunds over ₹50,000 go straight to a manager — the assistant knows the limits of its
+              authority.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div className="foot-inner">
+          <div className="fl">
+            <div className="fmark">
+              <BoltIcon />
+            </div>
+            KaranKart · AI-powered customer support
+          </div>
+          <div className="fr">
+            <span>Return policy</span>
+            <span>Help center</span>
+            <span>Contact</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

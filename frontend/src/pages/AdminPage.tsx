@@ -23,7 +23,8 @@ import {
   initials,
   mergeSteps,
 } from "@/lib/adminTrace";
-import { getCase, getCases, resolveEscalation } from "@/api/client";
+import { generateCaseSummary, getCase, getCases, resolveEscalation } from "@/api/client";
+import { SummaryCard } from "@/components/admin/SummaryCard";
 import type { CaseDetail, CaseSummary, Verdict } from "@/types";
 import { useSSE } from "@/hooks/useSSE";
 import "@/styles/admin.css";
@@ -57,6 +58,7 @@ export function AdminPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [detail, setDetail] = useState<CaseDetail | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [summarizing, setSummarizing] = useState(false);
   const { events, connected } = useSSE();
 
   async function loadCases() {
@@ -73,11 +75,30 @@ export function AdminPage() {
     loadCases().catch(() => undefined);
   }
 
+  // On-demand AI summary of the selected case (also used to regenerate).
+  async function handleSummarize() {
+    if (selectedId == null) return;
+    setSummarizing(true);
+    try {
+      const result = await generateCaseSummary(selectedId);
+      setDetail((prev) =>
+        prev
+          ? { ...prev, ai_summary: result.summary, ai_summary_at: result.generated_at }
+          : prev,
+      );
+    } catch {
+      // leave the card in its prior state; the button stays available to retry
+    } finally {
+      setSummarizing(false);
+    }
+  }
+
   useEffect(() => {
     loadCases().catch(() => undefined);
   }, []);
 
   useEffect(() => {
+    setSummarizing(false); // a different case is selected — drop any in-flight summary state
     if (selectedId == null) {
       setDetail(null);
       return;
@@ -291,6 +312,18 @@ export function AdminPage() {
 
         <aside className="detail">
           <p className="dlabel">CASE DETAILS</p>
+
+          {detail && (
+            <SummaryCard
+              summary={detail.ai_summary}
+              facts={detail.summary_facts}
+              generatedAt={detail.ai_summary_at}
+              stepCount={liveSteps.length}
+              model={runStats?.model ?? "gpt-4.1-mini"}
+              generating={summarizing}
+              onGenerate={handleSummarize}
+            />
+          )}
 
           {detail?.customer && (
             <div className="dcard">

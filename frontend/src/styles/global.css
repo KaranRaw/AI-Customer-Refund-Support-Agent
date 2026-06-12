@@ -39,3 +39,37 @@ a {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
+
+/* Global back button — floats top-left just under each page's nav. See BackButton.tsx. */
+.backbar {
+  max-width: 1280px;
+  padding: 16px 28px 0;
+}
+
+.backbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--bg-card);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 7px 16px 7px 12px;
+}
+
+.backbtn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.backbtn:hover {
+  color: var(--ink);
+  background: var(--bg-soft);
+}

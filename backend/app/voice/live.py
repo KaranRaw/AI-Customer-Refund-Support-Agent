@@ -10,8 +10,9 @@ VAD is a pipeline processor in 1.3.0 (not a transport param); the RTVI processor
 is required for the @pipecat-ai JS client's connect handshake.
 """
 
+import logging
+
 from fastapi import WebSocket
-from loguru import logger
 from pipecat.audio.vad.silero import SileroVADAnalyzer
 from pipecat.audio.vad.vad_analyzer import VADParams
 from pipecat.pipeline.pipeline import Pipeline
@@ -30,6 +31,8 @@ from pipecat.workers.runner import WorkerRunner
 from app.api.deps import get_llm_client
 from app.config import get_settings
 from app.voice.agent_bridge import AgentBridge
+
+logger = logging.getLogger(__name__)
 
 
 async def run_voice_session(

@@ -73,3 +73,11 @@ class OpenAIClient:
             prompt_tokens=usage.prompt_tokens if usage else None,
             completion_tokens=usage.completion_tokens if usage else None,
         )
+
+    async def complete(self, messages: list[Message]) -> str:
+        """Plain completion (no tools) — used for case summaries."""
+        response = await self._client.chat.completions.create(
+            model=self._model,
+            messages=[_to_openai_message(m) for m in messages],
+        )
+        return response.choices[0].message.content or ""

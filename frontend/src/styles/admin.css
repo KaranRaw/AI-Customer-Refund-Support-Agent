@@ -100,7 +100,7 @@
 /* ── Grid ────────────────────────────────────────────────────────────── */
 .admin .app {
   display: grid;
-  grid-template-columns: 288px minmax(0, 1fr) 312px;
+  grid-template-columns: 288px minmax(0, 1fr) 372px;
   flex: 1;
   min-height: 0;
 }
@@ -678,6 +678,168 @@
 .admin .dcard .row code {
   font-family: var(--mono);
   font-size: 11px;
+}
+
+/* ── AI case summary card (sum-* prefixed to avoid global collisions) ──── */
+.admin .sum-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--ink);
+  background: var(--bg-soft);
+  border: 1px dashed var(--line-2);
+  border-radius: 9px;
+  padding: 11px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.admin .sum-btn:hover {
+  border-color: var(--ink);
+}
+.admin .sum-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--ink);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.admin .sum-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.admin .sum-spark {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.admin .sum-spark svg {
+  width: 13px;
+  height: 13px;
+  stroke: #fff;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.admin .sum-head b {
+  font-size: 12.5px;
+  font-weight: 600;
+  flex: 1;
+}
+.admin .sum-regen {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--bg-card);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.admin .sum-regen:hover {
+  border-color: var(--ink);
+}
+.admin .sum-regen svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--ink-2);
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.admin .sum-skel {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.admin .sum-sk {
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--bg-soft) 25%, #e8e8e4 50%, var(--bg-soft) 75%);
+  background-size: 200% 100%;
+  animation: sum-shimmer 1.3s linear infinite;
+}
+.admin .sum-sk:nth-child(1) {
+  width: 95%;
+}
+.admin .sum-sk:nth-child(2) {
+  width: 88%;
+}
+.admin .sum-sk:nth-child(3) {
+  width: 60%;
+}
+@keyframes sum-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.admin .sum-skl {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.admin .sum-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  animation: sum-pulse 1s infinite;
+}
+@keyframes sum-pulse {
+  50% {
+    opacity: 0.2;
+  }
+}
+.admin .sum-text {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.admin .sum-facts {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.admin .sum-chip {
+  font-size: 10.5px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-soft);
+  color: var(--ink-2);
+}
+.admin .sum-chip.warn {
+  color: var(--amber);
+  background: var(--amber-bg);
+  border-color: var(--amber-line);
+}
+.admin .sum-meta {
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--ink-3);
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
 }
 .admin .dhead {
   display: flex;

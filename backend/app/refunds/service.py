@@ -5,9 +5,11 @@ the policy boundary, so an ineligible order cannot be refunded even if a caller 
 including a manipulated LLM — invokes it directly.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
@@ -22,6 +24,8 @@ from app.db.models import (
     Verdict,
 )
 from app.policy.engine import CheckResult, PolicyConfig, check_refund_eligibility
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -84,6 +88,9 @@ async def issue_refund(
     await session.commit()
     await session.refresh(refund_request)
 
+    logger.info(
+        "Refund issued: order=%s amount=%s request=%s", order.id, order.amount, refund_request.id
+    )
     return RefundOutcome(
         executed=True,
         verdict=Verdict.APPROVE,
@@ -100,6 +107,35 @@ async def escalate_to_manager(
     session: AsyncSession,
     conversation: Conversation,
 ) -> EscalationOutcome:
+    # Defense-in-depth: an order must not accumulate multiple open escalations. If one is
+    # already open (e.g. the customer asks again in a new chat), return it instead of
+    # raising a duplicate ticket — the same guarantee issue_refund gives via refunded_at.
+    existing = (
+        await session.execute(
+            select(Escalation)
+            .join(RefundRequest, Escalation.refund_request_id == RefundRequest.id)
+            .where(
+                RefundRequest.order_id == order.id,
+                Escalation.status == EscalationStatus.OPEN,
+            )
+            .order_by(Escalation.id)
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if existing is not None:
+        logger.info(
+            "Escalation already open for order=%s ticket=E-%s — reusing, not duplicating",
+            order.id,
+            existing.id,
+        )
+        return EscalationOutcome(
+            escalated=True,
+            reason=existing.reason,
+            assigned_to=existing.assigned_to,
+            escalation_id=existing.id,
+            refund_request_id=existing.refund_request_id,
+        )
+
     refund_request = RefundRequest(
         order_id=order.id,
         conversation_id=conversation.id,
@@ -122,6 +158,7 @@ async def escalate_to_manager(
     await session.commit()
     await session.refresh(escalation)
 
+    logger.info("Escalated to manager: order=%s ticket=E-%s", order.id, escalation.id)
     return EscalationOutcome(
         escalated=True,
         reason=reason,
@@ -173,4 +210,11 @@ async def resolve_escalation(
         conversation.verdict = verdict
 
     await session.commit()
+    logger.info(
+        "Manager resolved escalation E-%s as %s (order=%s, refunded=%s)",
+        escalation_id,
+        decision,
+        refund_request.order_id,
+        refunded,
+    )
     return ResolveOutcome(decision, verdict, refunded, escalation_id)

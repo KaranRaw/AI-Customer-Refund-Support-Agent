@@ -66,11 +66,22 @@ export interface OrderListItem {
   refunded: boolean;
   refund_ticket: string | null;
   conversation_id: number | null;
+  refund_eligible: boolean;
 }
 
 export interface ConversationHistory {
   conversation_id: number;
+  status: string; // "active" | "closed"
+  verdict: Verdict | null;
+  closed_at: string | null;
   messages: { role: "user" | "assistant"; text: string }[];
+}
+
+export interface ConversationState {
+  conversation_id: number;
+  status: string; // "active" | "closed"
+  verdict: Verdict | null;
+  closed_at: string | null;
 }
 
 export interface OrderDetail {
@@ -93,6 +104,11 @@ export interface CaseEscalation {
   status: string;
 }
 
+export interface CaseFact {
+  label: string;
+  tone: string; // "neutral" | "warn"
+}
+
 export interface CaseDetail {
   conversation_id: number;
   verdict: Verdict | null;
@@ -102,6 +118,17 @@ export interface CaseDetail {
   order: OrderDetail | null;
   escalation: CaseEscalation | null;
   steps: Step[];
+  ai_summary: string | null;
+  ai_summary_at: string | null;
+  summary_facts: CaseFact[];
+}
+
+export interface CaseSummaryResult {
+  conversation_id: number;
+  summary: string;
+  generated_at: string;
+  step_count: number;
+  model: string | null;
 }
 
 /** A live event off /admin/stream — a Step plus the conversation it belongs to. */

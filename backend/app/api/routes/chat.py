@@ -1,5 +1,7 @@
 """POST /chat — the customer entry point."""
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,11 +13,12 @@ from app.api.schemas import (
     ChatResponse,
     ConversationCreated,
     ConversationHistory,
+    ConversationState,
     MessageOut,
     OrderBrief,
 )
 from app.db.database import get_session
-from app.db.models import Conversation, ConversationChannel, Message
+from app.db.models import Conversation, ConversationChannel, ConversationStatus, Message
 from app.events.bus import event_bus
 from app.llm.client import LLMClient
 
@@ -28,6 +31,12 @@ async def chat(
     session: AsyncSession = Depends(get_session),
     llm: LLMClient = Depends(get_llm_client),
 ) -> ChatResponse:
+    # A closed conversation is final — don't append to it. The UI mints a fresh one
+    # for "Start a new chat", so this only fires on a stale/forged request.
+    if request.conversation_id is not None:
+        existing = await session.get(Conversation, request.conversation_id)
+        if existing is not None and existing.status is ConversationStatus.CLOSED:
+            raise HTTPException(status_code=409, detail="This conversation is closed.")
     result = await run_chat_turn(
         session,
         message=request.message,
@@ -85,5 +94,32 @@ async def conversation_messages(
     ).scalars().all()
     return ConversationHistory(
         conversation_id=conversation_id,
+        status=conversation.status.value,
+        verdict=conversation.verdict.value if conversation.verdict else None,
+        closed_at=conversation.closed_at,
         messages=[MessageOut(role=m.role.value, text=m.content) for m in rows],
+    )
+
+
+@router.post("/conversations/{conversation_id}/close", response_model=ConversationState)
+async def close_conversation(
+    conversation_id: int, session: AsyncSession = Depends(get_session)
+) -> ConversationState:
+    """End a chat: flip it to CLOSED and stamp the time. Idempotent.
+
+    This closes the *conversation* only — any open escalation/refund_request stays open
+    until a manager resolves it. The two lifecycles are intentionally separate.
+    """
+    conversation = await session.get(Conversation, conversation_id)
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if conversation.status is not ConversationStatus.CLOSED:
+        conversation.status = ConversationStatus.CLOSED
+        conversation.closed_at = datetime.now(timezone.utc)
+        await session.commit()
+    return ConversationState(
+        conversation_id=conversation.id,
+        status=conversation.status.value,
+        verdict=conversation.verdict.value if conversation.verdict else None,
+        closed_at=conversation.closed_at,
     )

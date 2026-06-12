@@ -1,13 +1,17 @@
-"""Read service for a customer's orders (the Orders page)."""
+"""Read service for a customer's orders (the Orders page + chat starter)."""
+
+from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas import OrderListItem
-from app.db.models import Escalation, EscalationStatus, Order, RefundRequest
+from app.db.models import Customer, Escalation, EscalationStatus, Order, RefundRequest, Verdict
+from app.policy.engine import check_refund_eligibility, load_policy_config
 
 
 async def list_customer_orders(session: AsyncSession, customer_id: str) -> list[OrderListItem]:
+    customer = await session.get(Customer, customer_id)
     orders = (
         await session.execute(
             select(Order).where(Order.customer_id == customer_id).order_by(Order.id)
@@ -34,6 +38,15 @@ async def list_customer_orders(session: AsyncSession, customer_id: str) -> list[
             tickets[order_id] = f"E-{escalation_id}"
             convs[order_id] = conversation_id
 
+    now = datetime.now(timezone.utc)
+    config = load_policy_config()
+
+    def is_eligible(order: Order) -> bool:
+        # Reuse the policy engine — actionable (APPROVE/ESCALATE), not a hard DENY.
+        if customer is None:
+            return False
+        return check_refund_eligibility(order, customer, now=now, config=config).verdict is not Verdict.DENY
+
     return [
         OrderListItem(
             id=order.id,
@@ -46,6 +59,7 @@ async def list_customer_orders(session: AsyncSession, customer_id: str) -> list[
             # A refunded order is settled — never show a stale "in review" ticket on it.
             refund_ticket=None if order.refunded_at is not None else tickets.get(order.id),
             conversation_id=None if order.refunded_at is not None else convs.get(order.id),
+            refund_eligible=is_eligible(order),
         )
         for order in orders
     ]

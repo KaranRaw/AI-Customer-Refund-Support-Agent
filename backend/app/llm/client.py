@@ -33,6 +33,10 @@ class LLMClient(Protocol):
         self, messages: list[Message], tools: list[dict[str, Any]]
     ) -> LLMResponse: ...
 
+    async def complete(self, messages: list[Message]) -> str:
+        """A plain text completion with no tools — for summarization, not the agent loop."""
+        ...
+
 
 def system_message(content: str) -> Message:
     return {"role": "system", "content": content}

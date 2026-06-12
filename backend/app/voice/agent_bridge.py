@@ -16,8 +16,8 @@ Turn-taking details that matter:
 """
 
 import asyncio
+import logging
 
-from loguru import logger
 from pipecat.frames.frames import (
     Frame,
     TranscriptionFrame,
@@ -33,6 +33,8 @@ from app.db.database import SessionFactory
 from app.db.models import ConversationChannel
 from app.events.bus import event_bus
 from app.llm.client import LLMClient
+
+logger = logging.getLogger(__name__)
 
 # The VAD emits VADUserStoppedSpeakingFrame; the STT layer may also re-emit the
 # standard UserStoppedSpeakingFrame. Either means "the user finished their turn".
@@ -71,7 +73,7 @@ class AgentBridge(FrameProcessor):
 
         if isinstance(frame, _STOP_FRAMES):
             logger.info(
-                "AgentBridge: user stopped (buffer='{}', busy={})", self._buffer, self._busy
+                "AgentBridge: user stopped (buffer=%r, busy=%s)", self._buffer, self._busy
             )
             if self._buffer and not self._busy:
                 text, self._buffer = self._buffer, ""
@@ -83,9 +85,13 @@ class AgentBridge(FrameProcessor):
 
     async def _handle(self, text: str, direction: FrameDirection) -> None:
         try:
-            logger.info("AgentBridge: running agent on '{}'", text)
+            logger.info("AgentBridge: running agent on %r", text)
+            # Tell the client the agent is working, so the voice orb can show its
+            # "thinking" state between the user's turn and the spoken reply.
+            if self._rtvi is not None:
+                await self._rtvi.send_server_message({"type": "thinking"})
             reply = await self._run_turn(text)
-            logger.info("AgentBridge: reply -> '{}'", reply)
+            logger.info("AgentBridge: reply -> %r", reply)
             if reply.strip():
                 if self._rtvi is not None:
                     await self._rtvi.send_server_message({"type": "bot_reply", "text": reply})

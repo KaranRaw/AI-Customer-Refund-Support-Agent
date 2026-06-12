@@ -36,3 +36,6 @@ package = false
 [tool.pytest.ini_options]
 asyncio_mode = "auto"           # treat async test functions as asyncio tests
 pythonpath = ["."]              # make the app package importable from tests
+markers = [
+    "eval: live LLM behavioral eval — makes real API calls; skipped unless RUN_EVALS=1",
+]

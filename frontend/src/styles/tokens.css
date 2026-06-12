@@ -34,6 +34,13 @@
   --amber-bg: #fbf1dc;
   --amber-line: #edd9a8;
 
+  /* Hero / dark surface (landing page) */
+  --hero: #14161c;
+  --hero-2: #1c1f27;
+  --hline: rgba(255, 255, 255, 0.1);
+  --htxt: #f2f3f7;
+  --htxt2: #9ba1b3;
+
   /* Radii */
   --r-sm: 8px;
   --r-md: 12px;
@@ -41,5 +48,6 @@
 
   /* Fonts */
   --font: "Inter", system-ui, -apple-system, sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
   --mono: "JetBrains Mono", ui-monospace, monospace;
 }

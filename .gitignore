@@ -3,7 +3,7 @@
 /CLAUDE.md
 /.claude/
 
-# ── Secrets (NEVER commit — repo is public) ───────────────────────────
+# ── Secrets  ──────────────────────────────────────────────────────
 .env
 .env.*
 !.env.example

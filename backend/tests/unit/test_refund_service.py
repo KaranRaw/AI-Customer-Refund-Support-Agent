@@ -129,6 +129,30 @@ async def test_escalate_opens_a_manager_ticket(db_session):
     assert escalation.assigned_to == outcome.assigned_to
 
 
+async def test_escalating_same_order_twice_reuses_the_open_ticket(db_session):
+    order = await _load_order(db_session, "ORD-1002")  # over the threshold -> escalate
+
+    conv1 = await _new_conversation(db_session, order.customer_id)
+    first = await escalate_to_manager(order, "over the limit", session=db_session, conversation=conv1)
+
+    # A second escalation — even from a different conversation — must reuse the open ticket.
+    conv2 = await _new_conversation(db_session, order.customer_id)
+    second = await escalate_to_manager(order, "asking again", session=db_session, conversation=conv2)
+
+    assert second.escalation_id == first.escalation_id
+    open_tickets = (
+        await db_session.execute(
+            select(Escalation)
+            .join(RefundRequest, Escalation.refund_request_id == RefundRequest.id)
+            .where(
+                RefundRequest.order_id == "ORD-1002",
+                Escalation.status == EscalationStatus.OPEN,
+            )
+        )
+    ).scalars().all()
+    assert len(open_tickets) == 1  # no duplicate raised
+
+
 async def test_forced_refund_on_ineligible_seeded_order_persists_nothing(db_session):
     now = datetime.now(timezone.utc)
     order = await _load_order(db_session, "ORD-1090")  # opened, not defective -> DENY

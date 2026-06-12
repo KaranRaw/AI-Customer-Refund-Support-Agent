@@ -6,14 +6,14 @@
   color: var(--ink);
 }
 
-/* ── Nav ─────────────────────────────────────────────────────────────── */
+/* ── Nav (dark, blends into the hero) ────────────────────────────────── */
 .home nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 40px;
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--line);
+  background: var(--hero);
+  border-bottom: 1px solid var(--hline);
 }
 .home .brand {
   display: flex;
@@ -24,14 +24,14 @@
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: var(--ink);
+  background: #fff;
   display: grid;
   place-items: center;
 }
 .home .mark svg {
   width: 16px;
   height: 16px;
-  stroke: #fff;
+  stroke: var(--hero);
   stroke-width: 2.2;
   fill: none;
   stroke-linecap: round;
@@ -41,37 +41,49 @@
   font-size: 16px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  color: var(--htxt);
 }
 .home .links {
   display: flex;
   align-items: center;
   gap: 28px;
   font-size: 13.5px;
-  color: var(--ink-2);
+  color: var(--htxt2);
 }
 .home .links a,
 .home .links span {
-  color: var(--ink-2);
+  color: var(--htxt2);
+}
+.home .links a:hover {
+  color: var(--htxt);
 }
 .home .me {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: var(--bg-soft);
-  border: 1px solid var(--line-2);
+  background: var(--hero-2);
+  border: 1px solid var(--hline);
   display: grid;
   place-items: center;
   font-size: 11px;
   font-weight: 600;
-  color: var(--ink-2);
+  color: var(--htxt2);
 }
 
 /* ── Hero ────────────────────────────────────────────────────────────── */
 .home .hero {
-  max-width: 680px;
+  background: var(--hero);
+  color: var(--htxt);
+  padding: 64px 0 96px;
+}
+.home .hero-inner {
+  max-width: 1080px;
   margin: 0 auto;
-  text-align: center;
-  padding: 72px 20px 44px;
+  display: grid;
+  grid-template-columns: 1fr 0.92fr;
+  gap: 54px;
+  align-items: center;
+  padding: 0 32px;
 }
 .home .pill {
   display: inline-flex;
@@ -79,9 +91,9 @@
   gap: 7px;
   font-size: 11.5px;
   font-weight: 600;
-  color: var(--green);
-  background: var(--green-bg);
-  border: 1px solid var(--green-line);
+  color: #9fd98a;
+  background: rgba(99, 153, 34, 0.14);
+  border: 1px solid rgba(99, 153, 34, 0.35);
   padding: 5px 14px;
   border-radius: 999px;
   margin-bottom: 20px;
@@ -90,43 +102,40 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--green-dot);
+  background: #7fc75a;
 }
 .home h1 {
-  font-size: 38px;
+  font-size: 46px;
   font-weight: 680;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
+  letter-spacing: -0.028em;
+  line-height: 1.08;
+}
+.home h1 em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 .home .sub {
-  margin: 14px auto 26px;
+  margin: 18px 0 26px;
   font-size: 15px;
-  color: var(--ink-2);
-  max-width: 460px;
-  line-height: 1.6;
+  color: var(--htxt2);
+  max-width: 440px;
+  line-height: 1.65;
 }
 .home .ctas {
   display: flex;
   gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
 }
 .home .btn {
   font-size: 13.5px;
   font-weight: 550;
-  padding: 11px 22px;
+  padding: 12px 24px;
   border-radius: 999px;
-  border: 1px solid var(--line-2);
-  background: var(--bg-card);
-  color: var(--ink);
   display: inline-flex;
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  transition: border-color 0.15s ease;
-}
-.home .btn:hover {
-  border-color: var(--ink);
 }
 .home .btn svg {
   width: 14px;
@@ -137,144 +146,429 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.home .btn.primary {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: #fff;
+.home .btn.w {
+  background: #fff;
+  color: var(--hero);
+  border: 1px solid #fff;
 }
-
-/* ── How it works ────────────────────────────────────────────────────── */
-.home .how {
-  max-width: 840px;
-  margin: 26px auto 0;
-  padding: 0 20px 30px;
+.home .btn.g {
+  background: transparent;
+  color: var(--htxt);
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
-.home .how-label {
-  text-align: center;
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  font-weight: 600;
-  color: var(--ink-3);
-  margin-bottom: 16px;
+.home .btn.g:hover {
+  border-color: rgba(255, 255, 255, 0.55);
 }
-.home .steps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+.home .ticks {
+  display: flex;
+  gap: 18px;
+  margin-top: 24px;
+  font-size: 12px;
+  color: var(--htxt2);
 }
-.home .stepc {
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 20px;
-  box-shadow: 0 1px 2px rgba(20, 22, 28, 0.04);
-  text-align: left;
-  position: relative;
+.home .ticks span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.home .num {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink-3);
-}
-.home .ic {
-  width: 38px;
-  height: 38px;
-  border-radius: var(--r-md);
-  background: var(--bg-soft);
-  display: grid;
-  place-items: center;
-  margin-bottom: 13px;
-}
-.home .ic svg {
-  width: 19px;
-  height: 19px;
-  stroke: var(--ink);
-  stroke-width: 1.8;
+.home .ticks svg {
+  width: 13px;
+  height: 13px;
+  stroke: #7fc75a;
+  stroke-width: 2.4;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.home .stepc b {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 5px;
-}
-.home .stepc p {
-  font-size: 12.5px;
-  color: var(--ink-2);
-  line-height: 1.55;
-}
-.home .stepc p code {
-  font-family: var(--mono);
-  font-size: 11px;
-}
 
-/* ── "Need help" strip ───────────────────────────────────────────────── */
-.home .strip {
-  max-width: 840px;
-  margin: 8px auto 0;
-  padding: 0 20px 64px;
+/* ── Layered cards: trace behind, chat in front ──────────────────────── */
+.home .stack {
+  position: relative;
+  height: 380px;
 }
-.home .strip-inner {
+.home .trace {
+  position: absolute;
+  top: -12px;
+  right: -6px;
+  width: 78%;
+  background: var(--hero-2);
+  border: 1px solid var(--hline);
+  border-radius: 14px;
+  padding: 14px 16px;
+  transform: rotate(2.2deg);
+  font-family: var(--mono);
+}
+.home .trace .tt {
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--htxt2);
+  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: var(--bg-card);
-  border: 1px solid var(--line);
-  border-radius: var(--r-lg);
-  padding: 16px 20px;
-  box-shadow: 0 1px 2px rgba(20, 22, 28, 0.04);
+  gap: 7px;
 }
-.home .bot {
-  width: 40px;
-  height: 40px;
+.home .trace .tt i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7fc75a;
+}
+.home .trow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10.5px;
+  color: var(--htxt2);
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.home .trow b {
+  color: var(--htxt);
+  font-weight: 500;
+}
+.home .trow .ok {
+  color: #7fc75a;
+}
+.home .trow .ms {
+  margin-left: auto;
+  font-size: 9px;
+  color: #5e6478;
+}
+/* NOTE: not ".chat" — that's the global ChatPage root (height:100vh) and would leak in. */
+.home .hero-chat {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 84%;
+  background: var(--bg-card);
+  color: var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transform: rotate(-1.2deg);
+}
+.home .chead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.home .hero-chat .bot {
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--ink);
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
-.home .bot svg {
-  width: 19px;
-  height: 19px;
+.home .hero-chat .bot svg {
+  width: 15px;
+  height: 15px;
   stroke: #fff;
   stroke-width: 1.9;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.home .strip-inner b {
+.home .chead b {
   display: block;
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 600;
 }
-.home .strip-inner small {
+.home .chead span {
+  font-size: 10px;
+  color: var(--ink-2);
+}
+.home .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green-dot);
+  margin-right: 4px;
+  vertical-align: 1px;
+}
+.home .cmsgs {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+.home .cu {
+  align-self: flex-end;
+  max-width: 82%;
+  background: var(--ink);
+  color: #fff;
+  padding: 7px 11px;
+  border-radius: 11px 11px 4px 11px;
+}
+.home .ca {
+  align-self: flex-start;
+  max-width: 86%;
+  background: var(--bg-soft);
+  padding: 7px 11px;
+  border-radius: 11px 11px 11px 4px;
+}
+.home .cticket {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-line);
+  border-radius: 7px;
+  padding: 6px 9px;
+  font-size: 10.5px;
+  color: var(--green);
+}
+.home .cticket svg {
+  width: 11px;
+  height: 11px;
+  stroke: var(--green);
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+.home .xray {
+  position: absolute;
+  right: 2%;
+  bottom: -14px;
+  background: #fff;
+  border-radius: 11px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  padding: 9px 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.home .xk {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--green-bg);
+  border: 1px solid var(--green-line);
+  display: grid;
+  place-items: center;
+}
+.home .xk svg {
+  width: 13px;
+  height: 13px;
+  stroke: var(--green);
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.home .xray b {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.home .xray small {
+  font-size: 9.5px;
+  color: var(--ink-2);
+}
+
+/* ── Overlapping stats band ──────────────────────────────────────────── */
+.home .stats {
+  max-width: 1080px;
+  margin: -44px auto 0;
+  padding: 0 32px;
+  position: relative;
+  z-index: 2;
+}
+.home .stats-inner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg-card);
+  box-shadow: 0 18px 44px rgba(20, 22, 28, 0.1);
+  overflow: hidden;
+}
+.home .stat {
+  padding: 20px 22px;
+  border-right: 1px solid var(--line);
+}
+.home .stat:last-child {
+  border-right: none;
+}
+.home .stat b {
+  display: block;
+  font-size: 22px;
+  font-weight: 680;
+  letter-spacing: -0.02em;
+}
+.home .stat span {
+  font-size: 11.5px;
+  color: var(--ink-2);
+}
+
+/* ── Verdicts band ───────────────────────────────────────────────────── */
+.home .verd {
+  max-width: 1080px;
+  margin: 52px auto 0;
+  padding: 0 32px;
+}
+.home .vlabel {
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+}
+.home .vh {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 680;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+.home .vh em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+}
+.home .vgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.home .vcard {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(20, 22, 28, 0.04);
+}
+.home .vpill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 650;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  margin-bottom: 12px;
+}
+.home .vpill::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.home .vp-ok {
+  color: var(--green);
+  background: var(--green-bg);
+  border-color: var(--green-line);
+}
+.home .vp-no {
+  color: var(--red);
+  background: var(--red-bg);
+  border-color: var(--red-line);
+}
+.home .vp-esc {
+  color: var(--amber);
+  background: var(--amber-bg);
+  border-color: var(--amber-line);
+}
+.home .vcard b {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.home .vcard p {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.home footer {
+  margin-top: 56px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-card);
+}
+.home .foot-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 22px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 12px;
   color: var(--ink-2);
 }
-.home .sp {
-  flex: 1;
+.home .fl {
+  display: flex;
+  align-items: center;
+  gap: 9px;
 }
-.home .foot {
-  text-align: center;
-  font-size: 11.5px;
-  color: var(--ink-3);
-  padding-bottom: 36px;
+.home .fmark {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+}
+.home .fmark svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.home .fr {
+  display: flex;
+  gap: 20px;
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────── */
-@media (max-width: 680px) {
+@media (max-width: 900px) {
   .home nav {
     padding: 14px 20px;
   }
-  .home h1 {
-    font-size: 29px;
+  .home .hero {
+    padding: 48px 0 80px;
   }
-  .home .steps {
+  .home .hero-inner {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .home .stack {
+    display: none; /* the rotated, absolutely-positioned cards are a desktop flourish */
+  }
+  .home h1 {
+    font-size: 34px;
+  }
+  .home .stats-inner {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .home .stat:nth-child(2) {
+    border-right: none;
+  }
+  .home .vgrid {
+    grid-template-columns: 1fr;
+  }
+  .home .foot-inner {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
   }
 }

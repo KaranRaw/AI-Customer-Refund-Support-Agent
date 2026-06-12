@@ -87,6 +87,11 @@ class CaseEscalation(BaseModel):
     status: str
 
 
+class CaseFact(BaseModel):
+    label: str
+    tone: str = "neutral"  # "neutral" | "warn" — code-derived chip, never the LLM's words
+
+
 class CaseDetail(BaseModel):
     conversation_id: int
     verdict: str | None = None
@@ -96,6 +101,17 @@ class CaseDetail(BaseModel):
     order: OrderDetail | None = None
     escalation: CaseEscalation | None = None
     steps: list[StepOut]
+    ai_summary: str | None = None
+    ai_summary_at: datetime | None = None
+    summary_facts: list[CaseFact] = []  # key facts from the policy engine (shown as chips)
+
+
+class CaseSummaryResult(BaseModel):
+    conversation_id: int
+    summary: str
+    generated_at: datetime
+    step_count: int
+    model: str | None = None
 
 
 class OrderListItem(BaseModel):
@@ -108,6 +124,9 @@ class OrderListItem(BaseModel):
     refunded: bool
     refund_ticket: str | None = None  # open escalation ref, if a refund is in review
     conversation_id: int | None = None  # the chat where the open refund was raised
+    # Policy engine says this order is still actionable (verdict != DENY) — used to rank
+    # likely refund targets first in the chat starter.
+    refund_eligible: bool = False
 
 
 class ConversationCreated(BaseModel):
@@ -119,8 +138,18 @@ class MessageOut(BaseModel):
     text: str
 
 
+class ConversationState(BaseModel):
+    conversation_id: int
+    status: str  # "active" | "closed"
+    verdict: str | None = None
+    closed_at: datetime | None = None
+
+
 class ConversationHistory(BaseModel):
     conversation_id: int
+    status: str = "active"
+    verdict: str | None = None
+    closed_at: datetime | None = None
     messages: list[MessageOut]
 
 

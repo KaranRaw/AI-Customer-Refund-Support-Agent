@@ -11,10 +11,18 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas import CaseDetail, CaseSummary, ResolveRequest, ResolveResult
+from app.api.deps import get_llm_client
+from app.api.schemas import (
+    CaseDetail,
+    CaseSummary,
+    CaseSummaryResult,
+    ResolveRequest,
+    ResolveResult,
+)
 from app.cases import service as case_service
 from app.db.database import get_session
 from app.events.bus import event_bus
+from app.llm.client import LLMClient
 from app.refunds.service import resolve_escalation
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -59,6 +67,22 @@ async def case_detail(
     if detail is None:
         raise HTTPException(status_code=404, detail="Case not found")
     return detail
+
+
+@router.post("/cases/{conversation_id}/summary", response_model=CaseSummaryResult)
+async def summarize_case(
+    conversation_id: int,
+    session: AsyncSession = Depends(get_session),
+    llm: LLMClient = Depends(get_llm_client),
+) -> CaseSummaryResult:
+    """Generate (and cache) an AI triage summary of the case. Complements the trace —
+    the manager triages with the summary and verifies with the full reasoning chain."""
+    result = await case_service.generate_case_summary(
+        session, conversation_id, llm, now=datetime.now(timezone.utc)
+    )
+    if result is None:
+        raise HTTPException(status_code=404, detail="Case not found")
+    return result
 
 
 @router.post("/escalations/{escalation_id}/resolve", response_model=ResolveResult)

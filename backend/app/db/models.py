@@ -162,10 +162,16 @@ class Conversation(Base):
     status: Mapped[ConversationStatus] = mapped_column(
         _enum(ConversationStatus), default=ConversationStatus.ACTIVE
     )
+    # Stamped when the customer ends the chat — distinct from the refund/escalation
+    # lifecycle, which the manager resolves separately.
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     verdict: Mapped[Verdict | None] = mapped_column(_enum(Verdict))
     order_id: Mapped[str | None] = mapped_column(ForeignKey("orders.id"), index=True)
     # The customer's stated reason for the refund — tracking only, never feeds the policy.
     refund_reason: Mapped[str | None] = mapped_column(Text)
+    # AI triage summary of the case for the admin panel — generated on demand, cached here.
+    ai_summary: Mapped[str | None] = mapped_column(Text)
+    ai_summary_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     messages: Mapped[list["Message"]] = relationship(
         back_populates="conversation", cascade="all, delete-orphan"

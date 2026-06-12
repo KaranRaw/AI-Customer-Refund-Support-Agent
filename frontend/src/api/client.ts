@@ -1,8 +1,10 @@
 import type {
   CaseDetail,
   CaseSummary,
+  CaseSummaryResult,
   ChatResponse,
   ConversationHistory,
+  ConversationState,
   Customer,
   OrderListItem,
 } from "@/types";
@@ -68,6 +70,11 @@ export function getCase(conversationId: number): Promise<CaseDetail> {
   return request<CaseDetail>(`/admin/cases/${conversationId}`);
 }
 
+/** Generate (and cache) the AI triage summary for a case. */
+export function generateCaseSummary(conversationId: number): Promise<CaseSummaryResult> {
+  return request<CaseSummaryResult>(`/admin/cases/${conversationId}/summary`, { method: "POST" });
+}
+
 export function streamUrl(conversationId?: number): string {
   const query = conversationId != null ? `?conversation_id=${conversationId}` : "";
   return `${API_URL}/admin/stream${query}`;
@@ -76,6 +83,11 @@ export function streamUrl(conversationId?: number): string {
 /** Mint an empty conversation so chat + voice can share one thread. */
 export function createConversation(): Promise<{ conversation_id: number }> {
   return request<{ conversation_id: number }>("/conversations", { method: "POST" });
+}
+
+/** End a chat — flips the conversation to CLOSED. Does not resolve any escalation. */
+export function closeConversation(conversationId: number): Promise<ConversationState> {
+  return request<ConversationState>(`/conversations/${conversationId}/close`, { method: "POST" });
 }
 
 /** WebSocket URL for the live-voice pipeline; `conversationId` shares the chat thread. */

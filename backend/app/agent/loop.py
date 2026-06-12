@@ -12,6 +12,7 @@ caller (the tracing layer) can pass `emit` to stream and store them.
 
 import asyncio
 import json
+import logging
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -28,6 +29,8 @@ from app.llm.client import (
     tool_result_message,
     user_message,
 )
+
+logger = logging.getLogger(__name__)
 from app.policy.engine import PolicyConfig, load_policy_config
 
 _LLM_FAILURE_MESSAGE = (
@@ -86,6 +89,9 @@ async def _call_llm_with_retry(
         except Exception as exc:  # noqa: BLE001 - any provider error is treated as retryable
             last_exc = exc
             if attempt < max_retries:
+                logger.warning(
+                    "LLM call failed (attempt %d/%d), retrying: %s", attempt + 1, max_retries, exc
+                )
                 await record(
                     StepEvent("retry", output={"attempt": attempt + 1, "error": str(exc)}, status="retried")
                 )
@@ -126,6 +132,7 @@ async def run_agent(
         try:
             response = await _call_llm_with_retry(llm, messages, max_retries, sleep, record)
         except Exception as exc:  # noqa: BLE001 - degrade gracefully on total LLM failure
+            logger.error("Agent LLM call failed after retries: %s", exc)
             await record(StepEvent("error", output={"error": str(exc)}, status="error"))
             return AgentResult(_LLM_FAILURE_MESSAGE, verdict, steps, messages)
         llm_latency_ms = int((time.monotonic() - llm_started) * 1000)
@@ -160,6 +167,7 @@ async def run_agent(
                 result = await dispatch(tool_call.name, tool_call.arguments, ctx)
                 status = "success" if result.get("ok", True) else "error"
             except Exception as exc:  # noqa: BLE001 - a tool crash is fed back, not fatal
+                logger.warning("Tool %s crashed: %s", tool_call.name, exc)
                 result = {"ok": False, "error": str(exc)}
                 status = "error"
             tool_latency_ms = int((time.monotonic() - tool_started) * 1000)
@@ -175,5 +183,6 @@ async def run_agent(
             verdict = _next_verdict(verdict, tool_call.name, result)
             messages.append(tool_result_message(tool_call.id, tool_call.name, json.dumps(result)))
 
+    logger.warning("Agent hit MAX_STEPS (%d) without a final answer", max_steps)
     await record(StepEvent("error", output={"error": f"MAX_STEPS ({max_steps}) exceeded"}, status="error"))
     return AgentResult(_LLM_FAILURE_MESSAGE, verdict, steps, messages, capped=True)

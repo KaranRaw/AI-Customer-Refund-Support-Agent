@@ -5,6 +5,7 @@ Wraps the agent loop with conversation persistence and tracing so any entry poin
 leaks into the route.
 """
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -31,6 +32,8 @@ from app.events.bus import EventBus
 from app.llm.client import LLMClient
 from app.llm.client import Message as LLMMessage
 from app.llm.client import assistant_message, user_message
+
+logger = logging.getLogger(__name__)
 
 
 # Shown as quick-reply chips when the agent asks why the customer wants the refund.
@@ -161,6 +164,12 @@ async def run_chat_turn(
             order, eligibility.reason, session=session, conversation=conversation
         )
         ticket = f"E-{outcome.escalation_id}"
+        logger.warning(
+            "Escalate verdict but escalate_to_manager was not called — runner backstopped "
+            "with ticket %s for order %s",
+            ticket,
+            order.id,
+        )
 
     # Offer reason chips exactly when the agent is asking for the reason: an order is
     # identified, but no reason recorded yet and no verdict reached.

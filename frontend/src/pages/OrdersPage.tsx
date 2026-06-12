@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
 import { getOrders } from "@/api/client";
+import { BackButton } from "@/components/BackButton";
 import { BoltIcon, BotIcon, ChatBubbleIcon, LaptopIcon } from "@/components/icons";
 import { useSession } from "@/lib/session";
 import type { OrderListItem } from "@/types";
@@ -134,6 +135,8 @@ export function OrdersPage() {
           </div>
         </div>
       </nav>
+
+      <BackButton />
 
       <div className="page">
         <p className="h">Your orders</p>

@@ -66,6 +66,30 @@ export const XIcon = () => (
   </svg>
 );
 
+export const ArrowLeftIcon = () => (
+  <svg viewBox="0 0 24 24">
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </svg>
+);
+
+export const SparkleIcon = () => (
+  <svg viewBox="0 0 24 24">
+    <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
+  </svg>
+);
+
+export const RefreshIcon = () => (
+  <svg viewBox="0 0 24 24">
+    <path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v5h-5" />
+  </svg>
+);
+
+export const PhoneIcon = () => (
+  <svg viewBox="0 0 24 24">
+    <path d="M3 12c6-6 12-6 18 0l-3 3c-4-4-8-4-12 0l-3-3z" />
+  </svg>
+);
+
 export const AlertCircleIcon = () => (
   <svg viewBox="0 0 24 24">
     <path d="M12 9v4M12 17h.01" />

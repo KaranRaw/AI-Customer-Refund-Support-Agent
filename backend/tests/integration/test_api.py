@@ -18,11 +18,15 @@ from app.main import app
 
 
 class FakeLLM:
-    def __init__(self, responses):
+    def __init__(self, responses, summary="Aarav requested a refund; it was escalated to a manager."):
         self._responses = list(responses)
+        self._summary = summary
 
     async def chat_with_tools(self, messages, tools):
         return self._responses.pop(0)
+
+    async def complete(self, messages):
+        return self._summary
 
 
 def call(call_id, name, args):
@@ -46,6 +50,8 @@ def _test_database_url() -> str:
 async def client():
     engine = create_async_engine(_test_database_url())
     async with engine.begin() as conn:
+        # Drop first so model changes (e.g. new columns) take effect on a reused test DB.
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     factory = async_sessionmaker(engine, expire_on_commit=False)
     async with factory() as session:
@@ -125,6 +131,81 @@ async def test_chat_multiturn_keeps_same_conversation(client):
         "/chat", json={"message": "ORD-1001", "conversation_id": conversation_id}
     )
     assert second.json()["conversation_id"] == conversation_id
+
+
+async def test_close_conversation_keeps_escalation_open_and_blocks_posts(client):
+    set_llm([
+        call("1", "check_refund_eligibility", {"order_id": "ORD-1002"}),
+        call("2", "escalate_to_manager", {"order_id": "ORD-1002", "reason": "over threshold"}),
+        say("Sent to a manager for review."),
+    ])
+    first = await client.post(
+        "/chat",
+        json={"message": "refund ORD-1002", "customer_email": "aarav.sharma@example.com"},
+    )
+    cid = first.json()["conversation_id"]
+
+    closed = await client.post(f"/conversations/{cid}/close")
+    assert closed.status_code == 200
+    state = closed.json()
+    assert state["status"] == "closed"
+    assert state["closed_at"] is not None
+    assert state["verdict"] == "escalate"
+
+    # Closing the chat is a separate lifecycle — it must NOT resolve the escalation.
+    detail = (await client.get(f"/admin/cases/{cid}")).json()
+    assert detail["escalation"]["status"] == "open"
+
+    # History reflects the closed state (powers "View chat").
+    history = (await client.get(f"/conversations/{cid}/messages")).json()
+    assert history["status"] == "closed"
+    assert history["closed_at"] is not None
+
+    # And a closed conversation refuses further messages.
+    set_llm([say("should not run")])
+    blocked = await client.post("/chat", json={"message": "more", "conversation_id": cid})
+    assert blocked.status_code == 409
+
+
+async def test_close_unknown_conversation_404(client):
+    response = await client.post("/conversations/999999/close")
+    assert response.status_code == 404
+
+
+async def test_case_summary_facts_then_generate_and_cache(client):
+    set_llm([
+        call("1", "check_refund_eligibility", {"order_id": "ORD-1002"}),
+        call("2", "escalate_to_manager", {"order_id": "ORD-1002", "reason": "over threshold"}),
+        say("Sent to a manager for review."),
+    ])
+    first = await client.post(
+        "/chat",
+        json={"message": "refund ORD-1002", "customer_email": "aarav.sharma@example.com"},
+    )
+    cid = first.json()["conversation_id"]
+
+    # Before generating: no summary yet, but the code-derived fact chips are present.
+    detail = (await client.get(f"/admin/cases/{cid}")).json()
+    assert detail["ai_summary"] is None
+    labels = [f["label"] for f in detail["summary_facts"]]
+    assert any("checks passed" in label for label in labels)
+    assert any(label.startswith("Over") for label in labels)  # over ₹50,000 → warn chip
+
+    # Generate the summary.
+    gen = await client.post(f"/admin/cases/{cid}/summary")
+    assert gen.status_code == 200
+    body = gen.json()
+    assert body["summary"]
+    assert body["step_count"] > 0
+
+    # Cached: re-reading the case returns the stored summary + timestamp.
+    detail2 = (await client.get(f"/admin/cases/{cid}")).json()
+    assert detail2["ai_summary"] == body["summary"]
+    assert detail2["ai_summary_at"] is not None
+
+
+async def test_case_summary_unknown_404(client):
+    assert (await client.post("/admin/cases/999999/summary")).status_code == 404
 
 
 async def test_case_detail_unknown_id_404(client):
