@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { fetchSpeech, postChat } from "@/api/client";
+import { createConversation, getConversationMessages, postChat } from "@/api/client";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { BoltIcon, LockIcon } from "@/components/icons";
 import { useSession } from "@/lib/session";
@@ -57,14 +57,6 @@ function toOrderInfo(order: OrderBrief): OrderInfo {
   };
 }
 
-async function speak(text: string): Promise<void> {
-  const blob = await fetchSpeech(text);
-  const url = URL.createObjectURL(blob);
-  const audio = new Audio(url);
-  audio.addEventListener("ended", () => URL.revokeObjectURL(url));
-  await audio.play();
-}
-
 export function ChatPage() {
   const { customer } = useSession();
   const location = useLocation();
@@ -73,7 +65,24 @@ export function ChatPage() {
   const [conversationId, setConversationId] = useState<number | null>(null);
   const [typing, setTyping] = useState(false);
 
-  async function handleSend(text: string, opts?: { speak?: boolean }) {
+  function addVoiceMessage(role: "user" | "assistant", text: string) {
+    setMessages((prev) => [...prev, { id: crypto.randomUUID(), role, text }]);
+  }
+
+  // Mint the shared conversation (if needed) so voice + text continue the SAME thread —
+  // the agent keeps context across both.
+  async function ensureConversation(): Promise<number | null> {
+    if (conversationId != null) return conversationId;
+    try {
+      const { conversation_id } = await createConversation();
+      setConversationId(conversation_id);
+      return conversation_id;
+    } catch {
+      return null;
+    }
+  }
+
+  async function handleSend(text: string) {
     if (typing) return;
     setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "user", text }]);
     setTyping(true);
@@ -89,11 +98,9 @@ export function ChatPage() {
           text: response.reply,
           order: response.order ? toOrderInfo(response.order) : undefined,
           ticket: response.ticket ?? undefined,
+          chips: response.quick_replies ?? undefined,
         },
       ]);
-      if (opts?.speak && response.reply) {
-        speak(response.reply).catch(() => undefined);
-      }
     } catch {
       setTyping(false);
       setMessages((prev) => [
@@ -117,6 +124,20 @@ export function ChatPage() {
     }
   }, []);
 
+  // On arrival from "View chat", load that conversation's messages and continue it.
+  useEffect(() => {
+    const convId = (location.state as { conversationId?: number } | null)?.conversationId;
+    if (convId == null) return;
+    getConversationMessages(convId)
+      .then((data) => {
+        setMessages(
+          data.messages.map((m) => ({ id: crypto.randomUUID(), role: m.role, text: m.text })),
+        );
+        setConversationId(convId);
+      })
+      .catch(() => undefined);
+  }, []);
+
   return (
     <div className="chat">
       <nav className="chat-nav">
@@ -129,6 +150,7 @@ export function ChatPage() {
         <div className="chat-links">
           <Link to="/orders">Orders</Link>
           <span className="on">Support</span>
+          <Link to="/voice">Live voice</Link>
           {customer ? (
             <div className="chat-me" title={customer.name}>
               {initials(customer.name)}
@@ -147,6 +169,12 @@ export function ChatPage() {
           messages={messages}
           typing={typing}
           onSend={handleSend}
+          voice={{
+            customerEmail: customer?.email,
+            ensureConversation,
+            onUserTurn: (text) => addVoiceMessage("user", text),
+            onBotTurn: (text) => addVoiceMessage("assistant", text),
+          }}
         />
         <p className="trust">
           <LockIcon />

@@ -1,30 +1,19 @@
-"""Voice I/O endpoints. The agent itself is unchanged — these only convert
-speech to text (in) and text to speech (out) around the existing /chat agent."""
+"""Live full-duplex voice — a Pipecat pipeline over a WebSocket.
 
-from fastapi import APIRouter, Request
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+Thin handler: the pipeline lives in app.voice.live.
+"""
 
-from app.config import get_settings
-from app.voice import get_stt_client, get_tts_client
+from fastapi import APIRouter, WebSocket
+
+from app.voice.live import run_voice_session
 
 router = APIRouter(prefix="/voice", tags=["voice"])
 
 
-class SpeakRequest(BaseModel):
-    text: str
-
-
-@router.post("/transcribe")
-async def transcribe(request: Request) -> dict[str, str]:
-    # Audio arrives as the raw request body (e.g. audio/webm from the browser).
-    audio = await request.body()
-    content_type = request.headers.get("content-type") or "audio/webm"
-    stt = get_stt_client(get_settings())
-    return {"text": await stt.transcribe(audio, content_type=content_type)}
-
-
-@router.post("/speak")
-async def speak(payload: SpeakRequest) -> StreamingResponse:
-    tts = get_tts_client(get_settings())
-    return StreamingResponse(tts.synthesize(payload.text), media_type="audio/mpeg")
+@router.websocket("/live")
+async def voice_live(
+    websocket: WebSocket, email: str | None = None, conversation_id: int | None = None
+) -> None:
+    """Full-duplex live voice. `email` ties the session to a signed-in customer;
+    `conversation_id` continues an existing chat thread so voice + text share context."""
+    await run_voice_session(websocket, customer_email=email, conversation_id=conversation_id)

@@ -6,6 +6,7 @@ import { ChatPage } from "@/pages/ChatPage";
 import { HomePage } from "@/pages/HomePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { OrdersPage } from "@/pages/OrdersPage";
+import { VoicePage } from "@/pages/VoicePage";
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/chat" element={<ChatPage />} />
+          <Route path="/voice" element={<VoicePage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -1,7 +1,7 @@
 """Request/response models — the validated API contract."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -30,6 +30,7 @@ class ChatResponse(BaseModel):
     verdict: str | None = None
     order: OrderBrief | None = None  # the order the agent focused on (-> OrderCard)
     ticket: str | None = None  # escalation ticket ref, e.g. "E-7" (-> TicketStrip)
+    quick_replies: list[str] | None = None  # clickable options (e.g. refund reasons)
 
 
 class StepOut(BaseModel):
@@ -79,6 +80,7 @@ class OrderDetail(BaseModel):
 
 
 class CaseEscalation(BaseModel):
+    id: int
     ref: str
     assigned_to: str
     reason: str
@@ -89,6 +91,7 @@ class CaseDetail(BaseModel):
     conversation_id: int
     verdict: str | None = None
     channel: str
+    refund_reason: str | None = None
     customer: CaseCustomer | None = None
     order: OrderDetail | None = None
     escalation: CaseEscalation | None = None
@@ -104,3 +107,28 @@ class OrderListItem(BaseModel):
     delivered_at: datetime | None = None
     refunded: bool
     refund_ticket: str | None = None  # open escalation ref, if a refund is in review
+    conversation_id: int | None = None  # the chat where the open refund was raised
+
+
+class ConversationCreated(BaseModel):
+    conversation_id: int
+
+
+class MessageOut(BaseModel):
+    role: str
+    text: str
+
+
+class ConversationHistory(BaseModel):
+    conversation_id: int
+    messages: list[MessageOut]
+
+
+class ResolveRequest(BaseModel):
+    decision: Literal["approve", "deny"]
+
+
+class ResolveResult(BaseModel):
+    decision: str
+    verdict: str
+    refunded: bool

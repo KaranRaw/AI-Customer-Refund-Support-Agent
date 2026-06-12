@@ -120,6 +120,7 @@ async def get_case_detail(session: AsyncSession, conversation_id: int) -> CaseDe
     ).scalar_one_or_none()
     escalation = (
         CaseEscalation(
+            id=escalation_row.id,
             ref=f"E-{escalation_row.id}",
             assigned_to=escalation_row.assigned_to,
             reason=escalation_row.reason,
@@ -141,6 +142,7 @@ async def get_case_detail(session: AsyncSession, conversation_id: int) -> CaseDe
         conversation_id=conversation_id,
         verdict=_enum_value(conversation.verdict),
         channel=conversation.channel.value,
+        refund_reason=conversation.refund_reason,
         customer=customer,
         order=order,
         escalation=escalation,

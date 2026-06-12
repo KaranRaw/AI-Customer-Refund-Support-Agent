@@ -23,7 +23,7 @@ import {
   initials,
   mergeSteps,
 } from "@/lib/adminTrace";
-import { getCase, getCases } from "@/api/client";
+import { getCase, getCases, resolveEscalation } from "@/api/client";
 import type { CaseDetail, CaseSummary, Verdict } from "@/types";
 import { useSSE } from "@/hooks/useSSE";
 import "@/styles/admin.css";
@@ -63,6 +63,14 @@ export function AdminPage() {
     const list = await getCases();
     setCases(list);
     setSelectedId((current) => current ?? list[0]?.conversation_id ?? null);
+  }
+
+  // Mock manager action: approve (issues the refund) or deny an open escalation.
+  async function handleResolve(decision: "approve" | "deny") {
+    if (!detail?.escalation || selectedId == null) return;
+    await resolveEscalation(detail.escalation.id, decision);
+    getCase(selectedId).then(setDetail).catch(() => undefined);
+    loadCases().catch(() => undefined);
   }
 
   useEffect(() => {
@@ -334,6 +342,12 @@ export function AdminPage() {
                   </b>
                 </div>
               )}
+              {detail.refund_reason && (
+                <div className="row">
+                  <span>Refund reason</span>
+                  <b>{detail.refund_reason}</b>
+                </div>
+              )}
               <div className="flags">
                 {flags.map((flag) => (
                   <span key={flag.label} className={`flag ${flag.kind}`}>
@@ -364,6 +378,16 @@ export function AdminPage() {
                 <span>Status</span>
                 <span className="openpill">{detail.escalation.status.toUpperCase()}</span>
               </div>
+              {detail.escalation.status === "open" && (
+                <div className="resolve">
+                  <button type="button" className="rbtn ok" onClick={() => handleResolve("approve")}>
+                    Approve refund
+                  </button>
+                  <button type="button" className="rbtn no" onClick={() => handleResolve("deny")}>
+                    Deny
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

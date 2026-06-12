@@ -164,6 +164,8 @@ class Conversation(Base):
     )
     verdict: Mapped[Verdict | None] = mapped_column(_enum(Verdict))
     order_id: Mapped[str | None] = mapped_column(ForeignKey("orders.id"), index=True)
+    # The customer's stated reason for the refund — tracking only, never feeds the policy.
+    refund_reason: Mapped[str | None] = mapped_column(Text)
 
     messages: Mapped[list["Message"]] = relationship(
         back_populates="conversation", cascade="all, delete-orphan"

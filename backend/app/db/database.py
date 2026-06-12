@@ -40,3 +40,11 @@ async def create_all() -> None:
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+
+async def drop_all() -> None:
+    """Drop all tables — used by the seed to rebuild the schema from scratch."""
+    from app.db import models  # noqa: F401 - import registers models on Base.metadata
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)

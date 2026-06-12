@@ -27,14 +27,10 @@ class Settings(BaseSettings):
     database_url: str
     max_steps: int
 
-    # Voice (optional — only needed for the speech pipeline)
-    stt_provider: str = "deepgram"
-    tts_provider: str = "elevenlabs"
+    # Voice (optional — only needed for the live speech pipeline)
     deepgram_api_key: str | None = None
-    deepgram_model: str = "nova-3"
     elevenlabs_api_key: str | None = None
     elevenlabs_voice_id: str | None = None
-    elevenlabs_model: str = "eleven_turbo_v2_5"
 
 
 @lru_cache

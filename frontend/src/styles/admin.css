@@ -759,6 +759,37 @@
   border-radius: 999px;
 }
 
+/* mock manager actions on an open escalation */
+.admin .resolve {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.admin .rbtn {
+  flex: 1;
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 9px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  border: 1px solid;
+  transition: filter 0.15s ease;
+}
+.admin .rbtn:hover {
+  filter: brightness(0.97);
+}
+.admin .rbtn.ok {
+  background: var(--green-bg);
+  border-color: var(--green-line);
+  color: var(--green);
+}
+.admin .rbtn.no {
+  background: var(--bg-soft);
+  border-color: var(--line-2);
+  color: var(--ink-2);
+}
+
 /* ── Empty states ────────────────────────────────────────────────────── */
 .admin .empty {
   flex: 1;

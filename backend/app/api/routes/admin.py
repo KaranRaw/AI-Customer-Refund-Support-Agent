@@ -5,15 +5,17 @@ Thin handlers: the query + assembly logic lives in app.cases.service.
 
 import asyncio
 import json
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.schemas import CaseDetail, CaseSummary
+from app.api.schemas import CaseDetail, CaseSummary, ResolveRequest, ResolveResult
 from app.cases import service as case_service
 from app.db.database import get_session
 from app.events.bus import event_bus
+from app.refunds.service import resolve_escalation
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -57,3 +59,20 @@ async def case_detail(
     if detail is None:
         raise HTTPException(status_code=404, detail="Case not found")
     return detail
+
+
+@router.post("/escalations/{escalation_id}/resolve", response_model=ResolveResult)
+async def resolve(
+    escalation_id: int,
+    payload: ResolveRequest,
+    session: AsyncSession = Depends(get_session),
+) -> ResolveResult:
+    """A mock manager approves (issues the refund) or denies an open escalation."""
+    outcome = await resolve_escalation(
+        session, escalation_id, payload.decision, now=datetime.now(timezone.utc)
+    )
+    if outcome is None:
+        raise HTTPException(status_code=404, detail="Escalation not found or already resolved.")
+    return ResolveResult(
+        decision=outcome.decision, verdict=outcome.verdict.value, refunded=outcome.refunded
+    )

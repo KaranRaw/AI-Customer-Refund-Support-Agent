@@ -25,6 +25,8 @@ def _test_database_url() -> str:
 async def db_session():
     engine = create_async_engine(_test_database_url())
     async with engine.begin() as conn:
+        # Drop first so model changes (e.g. new columns) take effect on a reused test DB.
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
