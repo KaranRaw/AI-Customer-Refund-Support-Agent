@@ -14,6 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.agent.loop import StepEvent, run_agent
 from app.agent.tools import ToolContext
 from app.agent.tracing import Tracer
+from app.policy.engine import check_refund_eligibility as run_eligibility
+from app.refunds.service import escalate_to_manager as run_escalate
 from app.db.models import (
     Conversation,
     ConversationChannel,
@@ -31,6 +33,16 @@ from app.llm.client import Message as LLMMessage
 from app.llm.client import assistant_message, user_message
 
 
+# Shown as quick-reply chips when the agent asks why the customer wants the refund.
+REASON_OPTIONS = [
+    "Defective / bad quality",
+    "Wrong item",
+    "Not as described",
+    "No longer needed",
+    "Something else",
+]
+
+
 @dataclass
 class ChatTurnResult:
     conversation_id: int
@@ -38,6 +50,7 @@ class ChatTurnResult:
     verdict: str | None
     order: Order | None = None
     ticket: str | None = None
+    quick_replies: list[str] | None = None
 
 
 async def _load_or_create_conversation(
@@ -134,4 +147,31 @@ async def run_chat_turn(
 
     ticket = await _ticket_ref(session, conversation.id) if result.verdict == "escalate" else None
 
-    return ChatTurnResult(conversation.id, result.answer, result.verdict, order, ticket)
+    # Defense-in-depth: an ESCALATE verdict MUST produce a ticket. The verdict is
+    # authoritative, so the ticket can't depend on the LLM remembering to call
+    # escalate_to_manager — if it didn't, the runner creates the escalation itself.
+    if (
+        result.verdict == "escalate"
+        and ticket is None
+        and order is not None
+        and ctx.customer is not None
+    ):
+        eligibility = run_eligibility(order, ctx.customer, now=ctx.now)
+        outcome = await run_escalate(
+            order, eligibility.reason, session=session, conversation=conversation
+        )
+        ticket = f"E-{outcome.escalation_id}"
+
+    # Offer reason chips exactly when the agent is asking for the reason: an order is
+    # identified, but no reason recorded yet and no verdict reached.
+    quick_replies = (
+        REASON_OPTIONS
+        if conversation.order_id is not None
+        and conversation.refund_reason is None
+        and conversation.verdict is None
+        else None
+    )
+
+    return ChatTurnResult(
+        conversation.id, result.answer, result.verdict, order, ticket, quick_replies
+    )

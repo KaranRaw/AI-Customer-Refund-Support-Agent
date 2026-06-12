@@ -142,6 +142,12 @@ async def request_more_info(ctx: ToolContext, *, missing_field: str) -> dict:
     return {"ok": True, "missing_field": missing_field, "ask": f"Could you share your {missing_field}?"}
 
 
+async def record_refund_reason(ctx: ToolContext, *, reason: str) -> dict:
+    # Tracking only — stored on the conversation; it never influences the policy verdict.
+    ctx.conversation.refund_reason = reason
+    return {"ok": True, "recorded": True, "reason": reason}
+
+
 async def get_policy_section(ctx: ToolContext, *, topic: str) -> dict:
     text = _POLICY_PATH.read_text(encoding="utf-8")
     sections = text.split("\n## ")
@@ -158,6 +164,7 @@ _TOOLS = {
     "issue_refund": issue_refund,
     "escalate_to_manager": escalate_to_manager,
     "request_more_info": request_more_info,
+    "record_refund_reason": record_refund_reason,
     "get_policy_section": get_policy_section,
 }
 
@@ -227,6 +234,14 @@ TOOL_SCHEMAS = [
         "Ask the customer for a missing piece of information.",
         {"missing_field": {"type": "string"}},
         ["missing_field"],
+    ),
+    _schema(
+        "record_refund_reason",
+        "Record the customer's stated reason for the refund (e.g. defective/bad quality, "
+        "wrong item, not as described, no longer needed, other). For tracking only — it does "
+        "NOT affect eligibility, which is decided solely by check_refund_eligibility.",
+        {"reason": {"type": "string"}},
+        ["reason"],
     ),
     _schema(
         "get_policy_section",

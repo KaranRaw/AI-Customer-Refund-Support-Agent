@@ -16,6 +16,7 @@ export interface ChatResponse {
   verdict: Verdict | null;
   order: OrderBrief | null;
   ticket: string | null;
+  quick_replies: string[] | null;
 }
 
 export interface Step {
@@ -64,6 +65,12 @@ export interface OrderListItem {
   delivered_at: string | null;
   refunded: boolean;
   refund_ticket: string | null;
+  conversation_id: number | null;
+}
+
+export interface ConversationHistory {
+  conversation_id: number;
+  messages: { role: "user" | "assistant"; text: string }[];
 }
 
 export interface OrderDetail {
@@ -79,6 +86,7 @@ export interface OrderDetail {
 }
 
 export interface CaseEscalation {
+  id: number;
   ref: string;
   assigned_to: string;
   reason: string;
@@ -89,6 +97,7 @@ export interface CaseDetail {
   conversation_id: number;
   verdict: Verdict | null;
   channel: string;
+  refund_reason: string | null;
   customer: CaseCustomer | null;
   order: OrderDetail | null;
   escalation: CaseEscalation | null;

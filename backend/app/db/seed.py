@@ -14,7 +14,7 @@ from decimal import Decimal
 
 from sqlalchemy import delete
 
-from app.db.database import Base, SessionFactory, create_all
+from app.db.database import Base, SessionFactory, create_all, drop_all
 from app.db.models import Customer, CustomerTier, Order, OrderStatus
 
 # id, name, email, phone, tier
@@ -106,6 +106,7 @@ async def _clear(session) -> None:
 
 
 async def seed() -> None:
+    await drop_all()  # rebuild the schema so model changes (new columns) take effect
     await create_all()
     now = datetime.now(timezone.utc)
     async with SessionFactory() as session:

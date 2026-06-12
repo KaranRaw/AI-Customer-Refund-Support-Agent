@@ -1,4 +1,11 @@
-import type { CaseDetail, CaseSummary, ChatResponse, Customer, OrderListItem } from "@/types";
+import type {
+  CaseDetail,
+  CaseSummary,
+  ChatResponse,
+  ConversationHistory,
+  Customer,
+  OrderListItem,
+} from "@/types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
@@ -39,8 +46,22 @@ export function getOrders(customerId: string): Promise<OrderListItem[]> {
   return request<OrderListItem[]>(`/customers/${customerId}/orders`);
 }
 
+export function getConversationMessages(conversationId: number): Promise<ConversationHistory> {
+  return request<ConversationHistory>(`/conversations/${conversationId}/messages`);
+}
+
 export function getCases(): Promise<CaseSummary[]> {
   return request<CaseSummary[]>("/admin/cases");
+}
+
+export function resolveEscalation(
+  escalationId: number,
+  decision: "approve" | "deny",
+): Promise<{ decision: string; verdict: string; refunded: boolean }> {
+  return request(`/admin/escalations/${escalationId}/resolve`, {
+    method: "POST",
+    body: JSON.stringify({ decision }),
+  });
 }
 
 export function getCase(conversationId: number): Promise<CaseDetail> {
@@ -52,23 +73,18 @@ export function streamUrl(conversationId?: number): string {
   return `${API_URL}/admin/stream${query}`;
 }
 
-export async function transcribe(audio: Blob): Promise<string> {
-  const response = await fetch(`${API_URL}/voice/transcribe`, {
-    method: "POST",
-    headers: { "Content-Type": audio.type || "audio/webm" },
-    body: audio,
-  });
-  if (!response.ok) throw new Error(`Transcribe failed: ${response.status}`);
-  const data = (await response.json()) as { text: string };
-  return data.text;
+/** Mint an empty conversation so chat + voice can share one thread. */
+export function createConversation(): Promise<{ conversation_id: number }> {
+  return request<{ conversation_id: number }>("/conversations", { method: "POST" });
 }
 
-export async function fetchSpeech(text: string): Promise<Blob> {
-  const response = await fetch(`${API_URL}/voice/speak`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
-  });
-  if (!response.ok) throw new Error(`Speak failed: ${response.status}`);
-  return response.blob();
+/** WebSocket URL for the live-voice pipeline; `conversationId` shares the chat thread. */
+export function voiceLiveUrl(email?: string | null, conversationId?: number | null): string {
+  const ws = API_URL.replace(/^http/, "ws");
+  const params = new URLSearchParams();
+  if (email) params.set("email", email);
+  if (conversationId != null) params.set("conversation_id", String(conversationId));
+  const qs = params.toString();
+  return `${ws}/voice/live${qs ? `?${qs}` : ""}`;
 }
+

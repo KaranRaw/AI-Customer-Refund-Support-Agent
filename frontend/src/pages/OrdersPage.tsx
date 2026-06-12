@@ -49,13 +49,17 @@ function statusInfo(order: OrderListItem): { badge: string; cls: string; note: R
   return { badge: "In transit", cls: "st-ship", note: "Refund available after delivery" };
 }
 
-function actionFor(order: OrderListItem, onRefund: (o: OrderListItem) => void): ReactNode {
+function actionFor(
+  order: OrderListItem,
+  onRefund: (o: OrderListItem) => void,
+  onViewChat: (o: OrderListItem) => void,
+): ReactNode {
   if (order.refund_ticket) {
     return (
-      <Link to="/chat" className="btn">
+      <button type="button" className="btn" onClick={() => onViewChat(order)}>
         <ChatBubbleIcon />
         View chat
-      </Link>
+      </button>
     );
   }
   if (order.refunded) return <span className="btn muted">Refunded</span>;
@@ -98,6 +102,12 @@ export function OrdersPage() {
     navigate("/chat", {
       state: { autoMessage: `I'd like a refund for my ${order.product_name} (${order.id}).` },
     });
+  }
+
+  function viewChat(order: OrderListItem) {
+    if (order.conversation_id != null) {
+      navigate("/chat", { state: { conversationId: order.conversation_id } });
+    }
   }
 
   const tabs: { key: Tab; label: string }[] = [
@@ -166,7 +176,7 @@ export function OrdersPage() {
                 <span className={`stat ${stat.cls}`}>{stat.badge}</span>
                 <span className="note">{stat.note}</span>
                 <span className="sp" />
-                {actionFor(order, requestRefund)}
+                {actionFor(order, requestRefund, viewChat)}
               </div>
             </div>
           );

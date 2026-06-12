@@ -129,3 +129,48 @@ async def escalate_to_manager(
         escalation_id=escalation.id,
         refund_request_id=refund_request.id,
     )
+
+
+@dataclass(frozen=True)
+class ResolveOutcome:
+    decision: str
+    verdict: Verdict
+    refunded: bool
+    escalation_id: int
+
+
+async def resolve_escalation(
+    session: AsyncSession, escalation_id: int, decision: str, *, now: datetime
+) -> ResolveOutcome | None:
+    """A (mock) manager resolves an open escalation.
+
+    APPROVE issues the refund — the manager's authority is exactly what the escalate
+    verdict is for — and DENY simply closes it. Either way the ticket flips OPEN ->
+    RESOLVED. Returns None (no-op) if the escalation is missing or already resolved.
+    """
+    escalation = await session.get(Escalation, escalation_id)
+    if escalation is None or escalation.status is not EscalationStatus.OPEN:
+        return None
+
+    refund_request = await session.get(RefundRequest, escalation.refund_request_id)
+    order = await session.get(Order, refund_request.order_id)
+    conversation = await session.get(Conversation, refund_request.conversation_id)
+
+    approved = decision == "approve"
+    verdict = Verdict.APPROVE if approved else Verdict.DENY
+
+    escalation.status = EscalationStatus.RESOLVED
+    refund_request.status = RefundStatus.RESOLVED
+    refund_request.verdict = verdict
+    refund_request.decided_by = DecidedBy.MANAGER
+    refund_request.resolved_at = now
+
+    refunded = False
+    if approved and order is not None and order.refunded_at is None:
+        order.refunded_at = now
+        refunded = True
+    if conversation is not None:
+        conversation.verdict = verdict
+
+    await session.commit()
+    return ResolveOutcome(decision, verdict, refunded, escalation_id)

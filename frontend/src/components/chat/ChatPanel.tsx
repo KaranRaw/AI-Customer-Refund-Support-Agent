@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef } from "react";
 
 import type { ChatMessage } from "@/types/chat";
-import { Composer } from "@/components/chat/Composer";
+import { Composer, type ComposerVoice } from "@/components/chat/Composer";
 import { BotIcon } from "@/components/icons";
 import { MessageBubble } from "@/components/chat/MessageBubble";
 import { QuickReplies } from "@/components/chat/QuickReplies";
@@ -10,10 +10,11 @@ interface Props {
   caseId: string;
   messages: ChatMessage[];
   typing: boolean;
-  onSend: (text: string, opts?: { speak?: boolean }) => void;
+  onSend: (text: string) => void;
+  voice: ComposerVoice;
 }
 
-export function ChatPanel({ caseId, messages, typing, onSend }: Props) {
+export function ChatPanel({ caseId, messages, typing, onSend, voice }: Props) {
   const msgsRef = useRef<HTMLDivElement>(null);
 
   // Keep the latest message in view as the conversation grows.
@@ -39,7 +40,6 @@ export function ChatPanel({ caseId, messages, typing, onSend }: Props) {
       </div>
 
       <div className="chat-msgs" ref={msgsRef}>
-        <span className="chat-stamp">Today, 2:41 PM</span>
         {messages.map((message) => (
           <Fragment key={message.id}>
             <MessageBubble message={message} />
@@ -57,7 +57,7 @@ export function ChatPanel({ caseId, messages, typing, onSend }: Props) {
         )}
       </div>
 
-      <Composer onSend={onSend} disabled={typing} />
+      <Composer onSend={onSend} voice={voice} disabled={typing} />
     </div>
   );
 }

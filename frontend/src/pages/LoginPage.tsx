@@ -57,8 +57,13 @@ export function LoginPage() {
     try {
       signIn(await login(target));
       navigate("/home");
-    } catch {
-      setError("No account found for that email — try one of the demo customers below.");
+    } catch (err) {
+      const notFound = err instanceof Error && err.message.includes("404");
+      setError(
+        notFound
+          ? "No account found for that email — try one of the demo customers below."
+          : "Can't reach the server right now — please try again in a moment.",
+      );
       setBusy(false);
     }
   }
