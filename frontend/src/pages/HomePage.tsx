@@ -26,7 +26,7 @@ export function HomePage() {
           <div className="mark">
             <BoltIcon />
           </div>
-          <b>KaranKart</b>
+          <b>RefundAI</b>
         </div>
         <div className="links">
           <Link to="/orders">Orders</Link>
@@ -36,7 +36,7 @@ export function HomePage() {
               {initials(customer.name)}
             </div>
           ) : (
-            <Link to="/">Sign in</Link>
+            <Link to="/login">Sign in</Link>
           )}
         </div>
       </nav>
@@ -213,7 +213,7 @@ export function HomePage() {
             <div className="fmark">
               <BoltIcon />
             </div>
-            KaranKart · AI-powered customer support
+            RefundAI · AI-powered customer support
           </div>
           <div className="fr">
             <span>Return policy</span>

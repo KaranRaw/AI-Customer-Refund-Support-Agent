@@ -35,7 +35,7 @@ function greetingFor(customer: Customer | null): ChatMessage {
     id: "greeting",
     role: "assistant",
     text:
-      "Hi! I'm KaranKart's refund assistant. Share your order ID and the email you used at " +
+      "Hi! I'm the RefundAI assistant. Share your order ID and the email you used at " +
       "checkout, and I'll help you with a refund.",
   };
 }
@@ -270,7 +270,7 @@ export function ChatPage() {
           <div className="chat-mark">
             <BoltIcon />
           </div>
-          <b>KaranKart</b>
+          <b>RefundAI</b>
         </div>
         <div className="chat-links">
           <Link to="/orders">Orders</Link>
@@ -281,7 +281,7 @@ export function ChatPage() {
               {initials(customer.name)}
             </div>
           ) : (
-            <Link to="/">Sign in</Link>
+            <Link to="/login">Sign in</Link>
           )}
         </div>
       </nav>
@@ -325,7 +325,7 @@ export function ChatPage() {
         />
         <p className="trust">
           <LockIcon />
-          Verified by order lookup · Powered by KaranKart AI support
+          Verified by order lookup · Powered by RefundAI
         </p>
       </div>
     </div>

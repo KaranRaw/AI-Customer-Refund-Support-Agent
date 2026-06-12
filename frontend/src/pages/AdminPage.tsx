@@ -151,7 +151,7 @@ export function AdminPage() {
           <div className="mark">
             <BoltIcon />
           </div>
-          <b>KaranKart</b>
+          <b>RefundAI</b>
           <span className="crumb">
             <i>/</i>Admin · Reasoning logs
           </span>

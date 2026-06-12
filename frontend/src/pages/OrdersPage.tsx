@@ -88,7 +88,7 @@ export function OrdersPage() {
       .catch(() => setOrders([]));
   }, [customer]);
 
-  if (!customer) return <Navigate to="/" replace />;
+  if (!customer) return <Navigate to="/login" replace />;
 
   const filtered = orders.filter((order) => {
     if (tab === "delivered") {
@@ -125,7 +125,7 @@ export function OrdersPage() {
           <div className="mark">
             <BoltIcon />
           </div>
-          <b>KaranKart</b>
+          <b>RefundAI</b>
         </div>
         <div className="links">
           <span className="on">Orders</span>

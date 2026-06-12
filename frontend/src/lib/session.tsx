@@ -8,7 +8,7 @@ interface SessionValue {
   signOut: () => void;
 }
 
-const STORAGE_KEY = "karankart.customer";
+const STORAGE_KEY = "refundai.customer";
 const SessionContext = createContext<SessionValue | null>(null);
 
 function loadCustomer(): Customer | null {
