@@ -14,8 +14,8 @@ export function BackButton() {
   const navigate = useNavigate();
   const { pathname, key } = useLocation();
 
-  // Login ("/") and home are roots — there is nothing to go back to.
-  if (pathname === "/" || pathname === "/home") return null;
+  // Login and home are roots — there is nothing to go back to.
+  if (pathname === "/" || pathname === "/login" || pathname === "/home") return null;
 
   function goBack() {
     // key === "default" means this is the first entry in the history stack, so

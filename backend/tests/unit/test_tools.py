@@ -21,7 +21,7 @@ async def test_lookup_customer_found_sets_context(db_session):
     result = await dispatch("lookup_customer", {"email": "aarav.sharma@example.com"}, ctx)
     assert result["found"] is True
     assert result["customer"]["tier"] == "vip"
-    assert len(result["orders"]) == 3
+    assert len(result["orders"]) == 4
     assert ctx.customer is not None
 
 

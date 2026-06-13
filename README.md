@@ -1,4 +1,4 @@
-# KaranKart — AI Refund Support Agent
+# RefundAI — AI Refund Support Agent
 
 > An **observable AI decision system** that approves, denies, or escalates
 > e-commerce refunds against a strict policy — and streams every reasoning step to

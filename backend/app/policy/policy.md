@@ -1,6 +1,6 @@
-# Refund Policy — KaranKart Electronics
+# Refund Policy — RefundAI Electronics
 
-This policy governs refunds for orders placed through KaranKart. All amounts are in
+This policy governs refunds for orders placed through RefundAI. All amounts are in
 Indian Rupees (INR).
 
 ## 1. Return window

@@ -13,13 +13,14 @@ export function App() {
     <SessionProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/voice" element={<VoicePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/home" replace />} />
         </Routes>
       </BrowserRouter>
     </SessionProvider>

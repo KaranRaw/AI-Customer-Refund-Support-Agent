@@ -42,6 +42,8 @@ _ORDERS = [
     ("ORD-1001", "cust-1", "Sony WH-1000XM5 Headphones", "audio", "26990.00", 9, False, False, False, None),
     ("ORD-1002", "cust-1", "MacBook Pro 16-inch", "laptop", "239900.00", 5, False, False, False, None),
     ("ORD-1003", "cust-1", "USB-C Charging Cable", "accessory", "799.00", 40, False, False, False, None),
+    # Final-sale clearance item: in window, but non-refundable -> a clean DENY for the demo.
+    ("ORD-1004", "cust-1", "JBL Cinema Soundbar (Clearance)", "audio", "8999.00", 8, False, False, True, None),
     ("ORD-1010", "cust-2", "Dell UltraSharp Monitor", "accessory", "38990.00", 12, False, False, False, 5),
     ("ORD-1011", "cust-2", "Logitech MX Keys Keyboard", "accessory", "9995.00", 56, False, False, False, None),
     ("ORD-1020", "cust-3", "AirPods Pro", "audio", "24900.00", 8, True, False, False, None),

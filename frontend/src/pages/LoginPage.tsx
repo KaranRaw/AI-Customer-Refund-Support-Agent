@@ -80,7 +80,7 @@ export function LoginPage() {
           <div className="mark">
             <BoltIcon />
           </div>
-          <b>KaranKart</b>
+          <b>RefundAI</b>
         </div>
         <Link className="navnote" to="/home">
           Browse without an account →

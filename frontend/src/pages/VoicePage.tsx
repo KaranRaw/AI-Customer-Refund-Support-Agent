@@ -132,7 +132,7 @@ export function VoicePage() {
           <div className="mark">
             <BoltIcon />
           </div>
-          <b>KaranKart</b>
+          <b>RefundAI</b>
         </div>
         <div className="links">
           <Link to="/chat">Text chat</Link>
