@@ -27,7 +27,7 @@ See also: [DATA-MODEL.md](./DATA-MODEL.md) · [AGENT-AND-POLICY.md](./AGENT-AND-
 │  /voice   full-duplex voice ──┼──WS────▶ │  GET  /admin/cases   (history)      │
 │  /admin   reasoning logs   ◀──┘          │  POST /admin/cases/{id}/summary     │
 │                               │          │                                     │
-└──────────────────────────────┘          │  agent emits step events ──┐        │
+└──────────────────────────────┘           │  agent emits step events ──┐        │
                                            │                            ▼        │
                                            │              ┌──────────────────┐   │
                                            │              │  in-memory event │   │
@@ -102,7 +102,7 @@ backend/app/
   db/
     database.py      async engine (asyncpg) + session + create_all/drop_all
     models.py        the 7 SQLAlchemy models
-    seed.py          15 customers + 26 orders (covers every edge case)
+    seed.py          15 customers + 27 orders (covers every edge case)
   policy/
     policy.md        human-readable policy (the agent can quote it)
     policy_config.json   machine values (window, threshold, currency)

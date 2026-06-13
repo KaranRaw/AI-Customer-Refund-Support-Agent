@@ -11,7 +11,7 @@
 
 ```
 customers ──< orders ───────────────┐
-    │                                │
+    │                               │
     └──< conversations ──< refund_requests ──< agent_steps   ⭐ (the reasoning spine)
               │                  │
               └──< messages      └──< escalations            (the ESCALATE path)
@@ -110,7 +110,7 @@ escalation** — `escalate_to_manager` reuses an existing open ticket (dedupe).
 
 ## Seed data — `app/db/seed.py`
 
-**15 customers + 26 orders**, with delivery dates relative to seed time so the 30-day-window
+**15 customers + 27 orders**, with delivery dates relative to seed time so the 30-day-window
 cases stay valid on every reseed. The dataset is built to trigger **every edge case**:
 
 | Edge case | Example seeded order |
@@ -119,16 +119,20 @@ cases stay valid on every reseed. The dataset is built to trigger **every edge c
 | APPROVE (opened **but defective**) | `ORD-1021` Anker power bank, opened+defective |
 | APPROVE (VIP extended window) | `ORD-1003` USB-C cable, 40d, VIP (within 45d) |
 | DENY (out of window) | `ORD-1140` Sennheiser, 45d, regular |
-| DENY (final sale) | `ORD-1030` clearance webcam |
+| DENY (final sale) | `ORD-1030` clearance webcam · `ORD-1004` JBL Soundbar |
 | DENY (opened, not defective) | `ORD-1031` Razer mouse |
 | DENY (already refunded) | `ORD-1010` Dell monitor, refunded |
 | ESCALATE (over ₹50,000) | `ORD-1002` MacBook Pro, ₹2,39,900 |
+
+> **Demo tip:** customer **Aarav Sharma** (`aarav.sharma@example.com`, VIP) owns one order of
+> each verdict — `ORD-1001` APPROVE, `ORD-1002` ESCALATE, `ORD-1004` DENY — so the whole
+> approve/deny/escalate story can be shown from a single login.
 
 ### Reseed (drops + recreates + inserts)
 
 ```bash
 cd backend && uv run python -m app.db.seed
-# -> "Seeded 15 customers and 26 orders."
+# -> "Seeded 15 customers and 27 orders."
 ```
 
 `seed.py` runs `drop_all()` → `create_all()` → insert, so a reseed always rebuilds the
