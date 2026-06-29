@@ -1,7 +1,10 @@
 # RefundAI — AI Refund Support Agent
 
-🎥 **[Watch the demo](https://drive.google.com/file/d/1CyGhgsCQcEk20nPcUmgiMN5j9PdNi030/view?usp=sharing)**
-&nbsp;·&nbsp; 🧰 Python · FastAPI · React · PostgreSQL · SSE
+<a href="https://drive.google.com/file/d/1CyGhgsCQcEk20nPcUmgiMN5j9PdNi030/view?usp=sharing" target="_blank">
+  <img width="1333" height="812" alt="RefundAI Demo" src="https://github.com/user-attachments/assets/e813d6c6-44f0-491c-8818-a5d31cb00236" />
+</a>
+
+🧰 **Python · FastAPI · React · PostgreSQL · SSE**
 
 > An **observable AI decision system** that approves, denies, or escalates
 > e-commerce refunds against a strict policy — and streams every reasoning step to
