@@ -1,7 +1,7 @@
 # RefundAI — AI Refund Support Agent
 
 <a href="https://drive.google.com/file/d/1CyGhgsCQcEk20nPcUmgiMN5j9PdNi030/view?usp=sharing" target="_blank">
-  <img width="1333" height="812" alt="RefundAI Demo" src="https://github.com/user-attachments/assets/e813d6c6-44f0-491c-8818-a5d31cb00236" />
+  <img width="1097" height="643" alt="image" src="https://github.com/user-attachments/assets/7e0930f5-1d6b-4a9a-84b0-19890225b66d" />
 </a>
 
 🎥 **[Watch the demo](https://drive.google.com/file/d/1CyGhgsCQcEk20nPcUmgiMN5j9PdNi030/view?usp=sharing)**  
