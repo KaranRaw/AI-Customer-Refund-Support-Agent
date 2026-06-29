@@ -4,6 +4,7 @@
   <img width="1333" height="812" alt="RefundAI Demo" src="https://github.com/user-attachments/assets/e813d6c6-44f0-491c-8818-a5d31cb00236" />
 </a>
 
+🎥 **[Watch the demo](https://drive.google.com/file/d/1CyGhgsCQcEk20nPcUmgiMN5j9PdNi030/view?usp=sharing)**  
 🧰 **Python · FastAPI · React · PostgreSQL · SSE**
 
 > An **observable AI decision system** that approves, denies, or escalates
